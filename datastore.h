@@ -42,6 +42,7 @@ public:
      */
     virtual void dump(std::ostream& ofile) = 0;
 
+    // this is a pure virtual class
 
 };
 

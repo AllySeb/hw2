@@ -9,6 +9,8 @@
 #include "db_parser.h"
 #include "product_parser.h"
 #include "util.h"
+#include "user.h"
+#include "mydatastore.h"
 
 using namespace std;
 struct ProdNameSorter {
@@ -29,8 +31,7 @@ int main(int argc, char* argv[])
      * Declare your derived DataStore object here replacing
      *  DataStore type to your derived type
      ****************/
-    DataStore ds;
-
+    MyDataStore ds;
 
 
     // Instantiate the individual section and product parsers we want
@@ -100,18 +101,75 @@ int main(int argc, char* argv[])
                 done = true;
             }
 	    /* Add support for other commands here */
+            else if ( cmd == "ADD") {
+							string username_in;
+							int hit_result_index;
 
+                if (ss >> username_in >> hit_result_index){
+                    // checking for invalid read-in's
+                    if (hit_result_index - 1 >= (int) hits.size() || (hit_result_index - 1) < 0){
+                        cout << "Invalid request" << endl;
+                    }
+                    else {
+											// add helper function checks username for validity
+                      ds.addToCart(username_in, hits[hit_result_index - 1]);
+                    }
+                }
+                else{
+                    cout << "Invalid request" << endl;
+                }
+            }
+            else if ( cmd == "VIEWCART") {
+            	// reading in username
+              string username_in;
+              if (ss >> username_in){
+                map<string, vector<Product*>>::iterator it = ds.map_.begin();
+                it = ds.map_.find(username_in);
 
+                // if username not provided or invalid, print "Invalid username"
+                if (it == ds.map_.end()){
+                  cout << "Invalid username" << endl;
+                }
+                else{
+                  // find username's cart in MyDataStore map
+                  vector<Product*> curr_cart = it->second;
 
-
+                  // for each item in cart:
+                  for (size_t i = 0; i < curr_cart.size(); i++){
+                    // print index number - item name
+                    cout << "Item " << i+1 << endl;
+                    cout << curr_cart[i]->displayString() << endl;
+                  }
+                }
+							}
+              else {
+                cout << "Invalid username" << endl;
+              }
+              
+            }
+            else if ( cmd == "BUYCART") {
+							// "Note: Your cart implementation must iterate through 
+							// the products in the order they were added."
+              // reading in username
+              string username_in;
+              if (ss >> username_in){
+								// helper function checks internally if username is valid
+								ds.buyCart(username_in);
+							}
+							else {
+								cout << "Invalid username" << endl;
+							}
+            }
             else {
-                cout << "Unknown command" << endl;
+              cout << "Unknown command" << endl;
             }
         }
-
-    }
+		}
     return 0;
 }
+
+// ASK: QUITTING PART 5 STEP 6???
+
 
 void displayProducts(vector<Product*>& hits)
 {
